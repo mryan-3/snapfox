@@ -1,3 +1,5 @@
+import { encryptText, decryptText } from "./crypto-helper";
+
 export class WebrtcPeer {
   pc = new RTCPeerConnection({ iceServers: [{ urls: "stun:stun.l.google.com:19302" }] });
   dc: RTCDataChannel | null = null;
@@ -8,6 +10,7 @@ export class WebrtcPeer {
     private roomId: string,
     private peerId: string,
     private isInitiator: boolean,
+    private key: CryptoKey,
     private onStatus: (status: string) => void,
     private onMessage: (msg: string) => void
   ) {
@@ -52,11 +55,21 @@ export class WebrtcPeer {
   private setupDataChannel(dc: RTCDataChannel) {
     dc.onopen = () => this.onStatus("connected");
     dc.onclose = () => this.onStatus("disconnected");
-    dc.onmessage = (e) => this.onMessage(e.data);
+    dc.onmessage = async (e) => {
+      try {
+        const decrypted = await decryptText(e.data, this.key);
+        this.onMessage(decrypted);
+      } catch (err) {
+        console.error("Decryption error:", err);
+      }
+    };
   }
 
-  send(data: string) {
-    if (this.dc?.readyState === "open") this.dc.send(data);
+  async send(data: string) {
+    if (this.dc?.readyState === "open") {
+      const encrypted = await encryptText(data, this.key);
+      this.dc.send(encrypted);
+    }
   }
 
   private sendSignal(signal: any) {
