@@ -1,65 +1,99 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useState, useRef } from "react";
+import { WebrtcPeer } from "@/utils/webrtc-peer";
 
 export default function Home() {
+  const [roomId, setRoomId] = useState("");
+  const [peer, setPeer] = useState<WebrtcPeer | null>(null);
+  const [status, setStatus] = useState("disconnected");
+  const [messages, setMessages] = useState<string[]>([]);
+  const [inputMsg, setInputMsg] = useState("");
+  const [isInitiator, setIsInitiator] = useState(false);
+  const peerIdRef = useRef(Math.random().toString(36).substring(7));
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const rId = params.get("room");
+    if (rId) {
+      setRoomId(rId);
+      setIsInitiator(false);
+    }
+  }, []);
+
+  const startConnection = (rId: string, init: boolean) => {
+    const wsUrl = "ws://localhost:8080";
+    const p = new WebrtcPeer(
+      wsUrl,
+      rId,
+      peerIdRef.current,
+      init,
+      (s) => setStatus(s),
+      (msg) => setMessages((prev) => [...prev, `Received: ${msg}`])
+    );
+    setPeer(p);
+  };
+
+  const createRoom = () => {
+    const rId = Math.random().toString(36).substring(7);
+    setRoomId(rId);
+    setIsInitiator(true);
+    window.history.pushState({}, "", `?room=${rId}`);
+    startConnection(rId, true);
+  };
+
+  const joinRoom = () => {
+    if (roomId) startConnection(roomId, false);
+  };
+
+  const handleSend = () => {
+    if (peer && inputMsg) {
+      peer.send(inputMsg);
+      setMessages((prev) => [...prev, `Sent: ${inputMsg}`]);
+      setInputMsg("");
+    }
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+    <div className="p-8 font-sans max-w-md mx-auto space-y-4">
+      <h1 className="text-xl font-bold">SnapFox Phase 2 Test</h1>
+      <div>Status: <span className="font-semibold text-blue-600">{status}</span></div>
+      {!peer ? (
+        <div className="space-y-2">
+          <button onClick={createRoom} className="w-full bg-emerald-600 text-white py-2 rounded">
+            Create Room
+          </button>
+          <div className="flex gap-2">
+            <input
+              value={roomId}
+              onChange={(e) => setRoomId(e.target.value)}
+              placeholder="Room ID"
+              className="border p-2 flex-1 rounded text-black"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            <button onClick={joinRoom} className="bg-zinc-800 text-white px-4 rounded">
+              Join
+            </button>
+          </div>
         </div>
-      </main>
+      ) : (
+        <div className="space-y-2">
+          <div>Room ID: <span className="font-mono">{roomId}</span> ({isInitiator ? "Host" : "Guest"})</div>
+          <div className="border p-2 h-40 overflow-y-auto bg-zinc-900 rounded space-y-1 text-sm text-zinc-300">
+            {messages.map((m, i) => <div key={i}>{m}</div>)}
+          </div>
+          <div className="flex gap-2">
+            <input
+              value={inputMsg}
+              onChange={(e) => setInputMsg(e.target.value)}
+              placeholder="Message..."
+              className="border p-2 flex-1 rounded text-black"
+            />
+            <button onClick={handleSend} className="bg-emerald-600 text-white px-4 rounded">
+              Send
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
