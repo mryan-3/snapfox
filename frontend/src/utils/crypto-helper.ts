@@ -1,29 +1,19 @@
-export async function generateKey(): Promise<CryptoKey> {
-  return crypto.subtle.generateKey(
-    { name: "AES-GCM", length: 256 },
-    true,
-    ["encrypt", "decrypt"]
-  );
+export async function generateEcdhKeyPair(): Promise<CryptoKeyPair> {
+  return crypto.subtle.generateKey({ name: "ECDH", namedCurve: "P-256" }, true, ["deriveKey"]);
 }
 
-export async function exportKey(key: CryptoKey): Promise<string> {
+export async function exportPublicKey(key: CryptoKey): Promise<string> {
   const raw = await crypto.subtle.exportKey("raw", key);
-  return Array.from(new Uint8Array(raw))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
+  return Array.from(new Uint8Array(raw)).map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-export async function importKey(hex: string): Promise<CryptoKey> {
-  const bytes = new Uint8Array(
-    hex.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16))
-  );
-  return crypto.subtle.importKey(
-    "raw",
-    bytes,
-    { name: "AES-GCM" },
-    true,
-    ["encrypt", "decrypt"]
-  );
+export async function importPublicKey(hex: string): Promise<CryptoKey> {
+  const bytes = new Uint8Array(hex.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16)));
+  return crypto.subtle.importKey("raw", bytes, { name: "ECDH", namedCurve: "P-256" }, true, []);
+}
+
+export async function deriveAesKey(priv: CryptoKey, pub: CryptoKey): Promise<CryptoKey> {
+  return crypto.subtle.deriveKey({ name: "ECDH", public: pub }, priv, { name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]);
 }
 
 export async function encryptRaw(data: Uint8Array, key: CryptoKey): Promise<Uint8Array> {

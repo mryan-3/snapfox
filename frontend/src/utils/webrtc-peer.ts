@@ -1,4 +1,4 @@
-import { encryptRaw, decryptRaw } from "./crypto-helper";
+import { encryptRaw, decryptRaw, generateEcdhKeyPair, exportPublicKey, importPublicKey, deriveAesKey } from "./crypto-helper";
 
 export class WebrtcPeer {
   pc = new RTCPeerConnection({ iceServers: [{ urls: "stun:stun.l.google.com:19302" }] });
@@ -7,10 +7,12 @@ export class WebrtcPeer {
   private rxChunks: Uint8Array[] = [];
   private rxBytes = 0;
   private meta: { name: string; size: number; type: string } | null = null;
+  private ecdhPromise = generateEcdhKeyPair();
+  private key: CryptoKey | null = null;
 
   constructor(
     wsUrl: string, private roomId: string, private peerId: string,
-    private isInitiator: boolean, private key: CryptoKey,
+    private isInitiator: boolean,
     private onStatus: (status: string) => void, private onMessage: (msg: string) => void,
     private onFile: (blob: Blob, name: string) => void, private onProgress?: (rx: number, total: number) => void
   ) {
@@ -23,7 +25,7 @@ export class WebrtcPeer {
     else this.pc.ondatachannel = (e) => this.setupDc(e.channel);
   }
 
-  encryptRaw(data: Uint8Array) { return encryptRaw(data, this.key); }
+  encryptRaw(data: Uint8Array) { if (!this.key) throw new Error("No key"); return encryptRaw(data, this.key); }
 
   private setupDc(dc: RTCDataChannel) {
     this.dc = dc;
@@ -34,6 +36,7 @@ export class WebrtcPeer {
   }
 
   private async handleData(data: Uint8Array) {
+    if (!this.key) return;
     const type = data[0];
     const payload = data.slice(1);
     if (type === 0x01) {
@@ -52,7 +55,7 @@ export class WebrtcPeer {
   }
 
   async sendText(text: string) {
-    if (this.dc?.readyState !== "open") return;
+    if (this.dc?.readyState !== "open" || !this.key) return;
     const encrypted = await encryptRaw(new TextEncoder().encode(text), this.key);
     const msg = new Uint8Array(1 + encrypted.length);
     msg[0] = 0x01; msg.set(encrypted, 1);
@@ -60,12 +63,20 @@ export class WebrtcPeer {
   }
 
   private async handleSignaling(data: any) {
-    if (data.type === "peer-joined" && this.isInitiator) {
-      const offer = await this.pc.createOffer();
-      await this.pc.setLocalDescription(offer);
-      this.sendSignal({ sdp: this.pc.localDescription });
+    if (data.type === "peer-joined") {
+      const pubStr = await exportPublicKey((await this.ecdhPromise).publicKey);
+      this.sendSignal({ ecdh: pubStr });
+      if (this.isInitiator) {
+        const offer = await this.pc.createOffer();
+        await this.pc.setLocalDescription(offer);
+        this.sendSignal({ sdp: this.pc.localDescription });
+      }
     } else if (data.type === "signal") {
       const { signal } = data;
+      if (signal.ecdh) {
+        const remotePub = await importPublicKey(signal.ecdh);
+        this.key = await deriveAesKey((await this.ecdhPromise).privateKey, remotePub);
+      }
       if (signal.sdp) {
         await this.pc.setRemoteDescription(new RTCSessionDescription(signal.sdp));
         if (signal.sdp.type === "offer") {

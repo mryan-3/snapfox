@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useRef } from "react";
 import { WebrtcPeer } from "@/utils/webrtc-peer";
-import { generateKey, exportKey, importKey } from "@/utils/crypto-helper";
 import { sendFileInChunks } from "@/utils/file-transfer";
 
 export default function Home() {
@@ -24,9 +23,9 @@ export default function Home() {
     if (rId) { setRoomId(rId); setIsInitiator(false); }
   }, []);
 
-  const connect = (rId: string, init: boolean, key: CryptoKey) => {
+  const connect = (rId: string, init: boolean) => {
     setPeer(new WebrtcPeer(
-      "ws://localhost:8080", rId, peerIdRef.current, init, key,
+      "ws://localhost:8080", rId, peerIdRef.current, init,
       (s) => setStatus(s),
       (m) => setMessages((prev) => [...prev, `Received: ${m}`]),
       (blob, name) => setRxFile({ url: URL.createObjectURL(blob), name }),
@@ -34,19 +33,16 @@ export default function Home() {
     ));
   };
 
-  const createRoom = async () => {
+  const createRoom = () => {
     const rId = Math.random().toString(36).substring(7);
-    const key = await generateKey();
-    const keyStr = await exportKey(key);
     setRoomId(rId);
     setIsInitiator(true);
-    window.history.pushState({}, "", `?room=${rId}#key=${keyStr}`);
-    connect(rId, true, key);
+    window.history.pushState({}, "", `?room=${rId}`);
+    connect(rId, true);
   };
 
-  const joinRoom = async () => {
-    const keyStr = window.location.hash.match(/#key=(.+)/)?.[1];
-    if (roomId && keyStr) connect(roomId, false, await importKey(keyStr));
+  const joinRoom = () => {
+    if (roomId) connect(roomId, false);
   };
 
   const handleSendText = () => {
@@ -67,7 +63,7 @@ export default function Home() {
 
   return (
     <div className="p-8 font-sans max-w-md mx-auto space-y-4">
-      <h1 className="text-xl font-bold">SnapFox Phase 4 File Test</h1>
+      <h1 className="text-xl font-bold">SnapFox ECDH Cryptography Test</h1>
       <div>Status: <span className="font-semibold text-blue-600">{status}</span></div>
       {!peer ? (
         <div className="space-y-2">
