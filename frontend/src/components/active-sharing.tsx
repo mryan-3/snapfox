@@ -1,5 +1,5 @@
 import { TransferZone } from "./transfer-zone";
-import { DownloadSimple } from "@phosphor-icons/react/dist/ssr";
+import { DownloadSimple, Copy } from "@phosphor-icons/react/dist/ssr";
 
 interface Props {
   roomId: string;
@@ -16,8 +16,8 @@ interface Props {
 
 export function ActiveSharing({ roomId, messages, rxFile, rxProgress, inputMsg, setInputMsg, onSendText, onSendFile, txProgress, remoteDevice }: Props) {
   return (
-    <div className="max-w-4xl mx-auto w-full px-6 flex flex-col gap-8 mt-12 mb-24">
-      
+    <div className="max-w-4xl mx-auto w-full px-4 sm:px-6 flex flex-col gap-6 md:gap-8 mt-6 md:mt-12 mb-12 md:mb-24">
+
       {/* Brand Header */}
       <div className="flex items-center justify-center gap-4">
         <img src="/logo.png" alt="SnapFox Logo" className="w-16 h-16 object-contain mix-blend-multiply" />
@@ -25,17 +25,15 @@ export function ActiveSharing({ roomId, messages, rxFile, rxProgress, inputMsg, 
       </div>
 
       {/* Header Panel */}
-      <div className="bg-white/90 backdrop-blur-md px-8 py-4 rounded-2xl border border-stone-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-white/90 backdrop-blur-md px-6 sm:px-8 py-4 rounded-2xl border border-stone-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <div className="w-3 h-3 rounded-full bg-accent animate-pulse" />
-          <div className="flex flex-col">
-            <h2 className="text-lg font-display font-bold text-stone-900 tracking-tight leading-tight">
-              Ready to Share
+          <div className="flex flex-col justify-center">
+            <h2 className="text-lg font-display font-semibold text-stone-900 tracking-tight leading-tight truncate">
+              Connected to {remoteDevice || 'remote device'}
             </h2>
-            <p className="text-xs text-stone-500 font-medium">Connected to {remoteDevice || 'remote device'}</p>
           </div>
         </div>
-        <div className="flex items-center gap-3 sm:text-right">
+        <div className="flex items-center sm:justify-end gap-3 pt-4 sm:pt-0 border-t sm:border-0 border-stone-100 mt-2 sm:mt-0">
           <p className="text-xs font-bold tracking-widest text-stone-400 uppercase">Code:</p>
           <p className="text-xl font-display font-bold text-stone-900 tracking-wider">
             {roomId}
@@ -61,23 +59,31 @@ export function ActiveSharing({ roomId, messages, rxFile, rxProgress, inputMsg, 
                 </div>
               </div>
             )}
-            
+
             {rxFile && (
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 rounded-2xl bg-[#FFF8F6] border border-orange-100 group transition-all">
-                <span className="text-lg font-display font-bold text-stone-800 truncate pr-4 mb-4 sm:mb-0 max-w-full sm:max-w-[70%]">{rxFile.name}</span>
-                <a 
-                  href={rxFile.url} 
-                  download={rxFile.name} 
-                  className="px-6 py-2.5 bg-stone-900 text-white font-medium text-sm tracking-wider uppercase hover:bg-accent transition-colors rounded-full flex items-center gap-2 shrink-0"
+              <div className="flex flex-row items-center justify-between p-6 rounded-2xl bg-[#FFF8F6] border border-orange-100 group transition-all gap-4">
+                <span className="text-lg font-display font-bold text-stone-800 truncate pr-4">{rxFile.name}</span>
+                <a
+                  href={rxFile.url}
+                  download={rxFile.name}
+                  title="Download file"
+                  className="w-12 h-12 bg-stone-900 text-white hover:bg-accent transition-colors rounded-full flex items-center justify-center shrink-0 shadow-sm"
                 >
-                  <DownloadSimple size={18} weight="bold" /> Download
+                  <DownloadSimple size={22} weight="bold" />
                 </a>
               </div>
             )}
-            
+
             {messages.map((m, i) => (
-              <div key={i} className="p-6 rounded-2xl bg-stone-100 text-stone-800 font-medium text-lg leading-relaxed whitespace-pre-wrap">
+              <div key={i} className="relative p-6 rounded-2xl bg-stone-100 text-stone-800 font-medium text-lg leading-relaxed whitespace-pre-wrap pr-16">
                 {m}
+                <button
+                  onClick={() => navigator.clipboard.writeText(m)}
+                  className="absolute top-4 right-4 p-2 text-stone-400 hover:text-stone-900 bg-white hover:bg-stone-50 rounded-xl shadow-sm transition-all"
+                  title="Copy to clipboard"
+                >
+                  <Copy size={20} weight="bold" />
+                </button>
               </div>
             ))}
           </div>

@@ -16,7 +16,7 @@ export function PairingHero({ roomId, joinCode, setJoinCode, onJoin }: Props) {
   const url = mounted ? `${window.location.origin}/?room=${roomId}` : "";
 
   return (
-    <div className="min-h-[85vh] flex flex-col px-6 pt-8 pb-16 max-w-6xl mx-auto w-full justify-center">
+    <div className="min-h-[85vh] flex flex-col px-4 sm:px-6 pt-4 md:pt-8 pb-12 md:pb-16 max-w-6xl mx-auto w-full justify-center">
       <div className="w-full flex justify-center items-center gap-4 mb-8">
         <img src="/logo.png" alt="SnapFox Logo" className="w-16 h-16 object-contain mix-blend-multiply" />
         <h1 className="text-4xl font-display font-extrabold text-stone-900 tracking-tight">SnapFox</h1>
