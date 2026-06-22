@@ -17,17 +17,14 @@ export function PairingHero({ roomId, joinCode, setJoinCode, onJoin }: Props) {
   const url = mounted ? `${window.location.origin}/?room=${roomId}` : "";
 
   return (
-    <div className="min-h-[85vh] flex flex-col px-4 sm:px-6 pt-4 md:pt-8 pb-12 md:pb-16 max-w-6xl mx-auto w-full justify-center">
-      <div className="w-full flex justify-center items-center gap-4 mb-8">
-        <img src="/logo.png" alt="SnapFox Logo" className="w-16 h-16 object-contain mix-blend-multiply" />
-        <h1 className="text-4xl font-display font-extrabold text-stone-900 tracking-tight">SnapFox</h1>
+    <div className="flex flex-col px-4 sm:px-6 pt-8 pb-12 md:pb-24 max-w-6xl mx-auto w-full">
+      <div className="w-full flex justify-center items-center gap-4 mb-6 md:mb-8">
+        <img src="/logo.png" alt="SnapFox Logo" className="w-20 h-20 md:w-16 md:h-16 object-contain mix-blend-multiply" />
+        <h1 className="hidden md:block text-4xl font-display font-extrabold text-stone-900 tracking-tight">SnapFox</h1>
       </div>
 
       <div className="w-full flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-16">
         <div className="flex-1 text-center lg:text-left">
-          <div className="inline-flex items-center justify-center px-4 py-2 rounded-full bg-stone-200/50 text-stone-600 text-sm font-medium mb-6">
-            Zero-Click Pairing
-          </div>
           <h1 className="text-5xl lg:text-7xl font-display font-extrabold text-stone-900 leading-[1.1] tracking-tight mb-6">
             Share <br /> Instantly.
           </h1>

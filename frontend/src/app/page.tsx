@@ -72,7 +72,10 @@ export default function Home() {
   return (
     <main className="w-full flex flex-col">
       {status !== "connected" ? (
-        <PairingScreen roomId={roomId} joinCode={joinCode} setJoinCode={setJoinCode} onJoin={handleManualJoin} />
+        <>
+          <PairingScreen roomId={roomId} joinCode={joinCode} setJoinCode={setJoinCode} onJoin={handleManualJoin} />
+          <LandingFeatures />
+        </>
       ) : (
         <ActiveSharing 
           roomId={roomId} messages={messages} rxFile={rxFile} rxProgress={rxProgress} 
@@ -80,7 +83,6 @@ export default function Home() {
           txProgress={txProgress} remoteDevice={remoteDevice}
         />
       )}
-      <LandingFeatures />
     </main>
   );
 }
