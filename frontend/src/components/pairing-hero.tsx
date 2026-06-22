@@ -1,4 +1,5 @@
-import { QrTicket } from "./qr-ticket";
+import dynamic from "next/dynamic";
+const QrTicket = dynamic(() => import("./qr-ticket").then(mod => mod.QrTicket), { ssr: false });
 import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import { useState, useEffect } from "react";
 

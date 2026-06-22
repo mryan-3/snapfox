@@ -13,7 +13,6 @@ export default function Home() {
   const [peer, setPeer] = useState<WebrtcPeer | null>(null);
   const [status, setStatus] = useState("disconnected");
   const [messages, setMessages] = useState<string[]>([]);
-  const [inputMsg, setInputMsg] = useState("");
   const [txProgress, setTxProgress] = useState(0);
   const [rxProgress, setRxProgress] = useState(0);
   const [rxFile, setRxFile] = useState<{ url: string; name: string } | null>(null);
@@ -59,8 +58,8 @@ export default function Home() {
     }
   };
 
-  const handleSendText = () => {
-    if (peer && inputMsg) { peer.sendText(inputMsg); setInputMsg(""); }
+  const handleSendText = (msg: string) => {
+    if (peer && msg) { peer.sendText(msg); }
   };
 
   const handleSendFile = async (file: File) => {
@@ -71,18 +70,16 @@ export default function Home() {
   };
 
   return (
-    <main className="w-full">
-      <div className="min-h-[85vh] flex flex-col justify-center">
-        {status !== "connected" ? (
-          <PairingScreen roomId={roomId} joinCode={joinCode} setJoinCode={setJoinCode} onJoin={handleManualJoin} />
-        ) : (
-          <ActiveSharing 
-            roomId={roomId} messages={messages} rxFile={rxFile} rxProgress={rxProgress} 
-            inputMsg={inputMsg} setInputMsg={setInputMsg} onSendText={handleSendText} 
-            onSendFile={handleSendFile} txProgress={txProgress} remoteDevice={remoteDevice}
-          />
-        )}
-      </div>
+    <main className="w-full flex flex-col">
+      {status !== "connected" ? (
+        <PairingScreen roomId={roomId} joinCode={joinCode} setJoinCode={setJoinCode} onJoin={handleManualJoin} />
+      ) : (
+        <ActiveSharing 
+          roomId={roomId} messages={messages} rxFile={rxFile} rxProgress={rxProgress} 
+          onSendText={handleSendText} onSendFile={handleSendFile} 
+          txProgress={txProgress} remoteDevice={remoteDevice}
+        />
+      )}
       <LandingFeatures />
     </main>
   );

@@ -6,15 +6,13 @@ interface Props {
   messages: string[];
   rxFile: { url: string; name: string } | null;
   rxProgress: number;
-  inputMsg: string;
-  setInputMsg: (m: string) => void;
-  onSendText: () => void;
+  onSendText: (m: string) => void;
   onSendFile: (f: File) => void;
   txProgress: number;
   remoteDevice?: string;
 }
 
-export function ActiveSharing({ roomId, messages, rxFile, rxProgress, inputMsg, setInputMsg, onSendText, onSendFile, txProgress, remoteDevice }: Props) {
+export function ActiveSharing({ roomId, messages, rxFile, rxProgress, onSendText, onSendFile, txProgress, remoteDevice }: Props) {
   return (
     <div className="max-w-4xl mx-auto w-full px-4 sm:px-6 flex flex-col gap-6 md:gap-8 mt-6 md:mt-12 mb-12 md:mb-24">
 
@@ -42,7 +40,7 @@ export function ActiveSharing({ roomId, messages, rxFile, rxProgress, inputMsg, 
       </div>
 
       {/* Input Zone */}
-      <TransferZone inputMsg={inputMsg} setInputMsg={setInputMsg} onSendText={onSendText} onSendFile={onSendFile} txProgress={txProgress} />
+      <TransferZone onSendText={onSendText} onSendFile={onSendFile} txProgress={txProgress} />
 
       {/* History Area */}
       {(messages.length > 0 || rxProgress > 0 || rxFile) && (

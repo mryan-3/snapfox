@@ -1,15 +1,14 @@
 import { PaperPlaneRight, FileArrowUp } from "@phosphor-icons/react/dist/ssr";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 
 interface Props {
-  inputMsg: string;
-  setInputMsg: (m: string) => void;
-  onSendText: () => void;
+  onSendText: (m: string) => void;
   onSendFile: (f: File) => void;
   txProgress: number;
 }
 
-export function TransferZone({ inputMsg, setInputMsg, onSendText, onSendFile, txProgress }: Props) {
+export function TransferZone({ onSendText, onSendFile, txProgress }: Props) {
+  const [inputMsg, setInputMsg] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -17,10 +16,17 @@ export function TransferZone({ inputMsg, setInputMsg, onSendText, onSendFile, tx
     if (e.target.files && e.target.files[0]) onSendFile(e.target.files[0]);
   };
 
+  const submitText = () => {
+    if (inputMsg.trim()) {
+      onSendText(inputMsg);
+      setInputMsg("");
+    }
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      onSendText();
+      submitText();
     }
   };
 
@@ -45,7 +51,7 @@ export function TransferZone({ inputMsg, setInputMsg, onSendText, onSendFile, tx
         <div className="flex justify-between items-end mt-4">
           <p className="text-xs text-stone-400 font-medium tracking-wide hidden sm:block">Press Enter to send, Shift+Enter for new line</p>
           <button
-            onClick={onSendText}
+            onClick={submitText}
             disabled={!inputMsg.trim()}
             className="ml-auto px-6 py-2.5 bg-stone-900 hover:bg-accent disabled:bg-stone-100 disabled:text-stone-400 text-white font-bold tracking-wider uppercase text-sm transition-colors rounded-full flex items-center gap-2"
           >

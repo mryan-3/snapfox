@@ -1,6 +1,7 @@
 import { GithubLogo } from "@phosphor-icons/react/dist/ssr";
+import { memo } from "react";
 
-export function LandingFeatures() {
+export const LandingFeatures = memo(function LandingFeatures() {
   return (
     <div className="border-t border-stone-300/50 bg-stone-100">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16 md:py-32 w-full flex flex-col">
@@ -23,7 +24,7 @@ export function LandingFeatures() {
           </div>
         </div>
 
-        <div className="bg-stone-900 rounded-[2rem] md:rounded-4xl p-8 md:p-16 flex flex-col md:flex-row items-center justify-between text-white shadow-xl">
+        <div className="bg-stone-900 rounded-4xl md:rounded-4xl p-8 md:p-16 flex flex-col md:flex-row items-center justify-between text-white shadow-xl">
           <div className="max-w-lg mb-8 md:mb-0">
             <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">Open Source.</h2>
             <p className="text-stone-400 text-lg">SnapFox is entirely open-source. Inspect the code, host it yourself, or contribute to make local sharing even better.</p>
@@ -42,4 +43,4 @@ export function LandingFeatures() {
       </div>
     </div>
   );
-}
+});
