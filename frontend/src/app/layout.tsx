@@ -24,7 +24,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${fraunces.variable} ${dmSans.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col bg-stone-200 text-[#1C1917] font-sans selection:bg-[#F25C3B] selection:text-white overflow-x-hidden">
+      <body className="min-h-full flex flex-col bg-stone-200 text-[#1C1917] font-sans selection:bg-accent selection:text-white overflow-x-hidden">
         {children}
       </body>
     </html>
