@@ -4,8 +4,8 @@ import { memo } from "react";
 export const LandingFeatures = memo(function LandingFeatures() {
   return (
     <div className="border-t border-stone-300/50 bg-stone-100">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16 md:py-32 w-full flex flex-col">
-        <div className="flex flex-col md:flex-row justify-between gap-12 md:gap-16 mb-24 pt-12 md:pt-20">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16 w-full flex flex-col">
+        <div className="flex flex-col md:flex-row justify-between gap-12 md:gap-16 mb-24">
           <div className="flex-1 relative pt-12">
             <div className="absolute top-0 right-0 text-[10rem] md:text-[14rem] font-display font-black text-accent/10 leading-none select-none z-0">1</div>
             <div className="relative z-10">
