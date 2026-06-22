@@ -39,8 +39,13 @@ export default function Home() {
   }, []);
 
   const connect = (rId: string, init: boolean) => {
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const wsPort = process.env.NEXT_PUBLIC_WS_PORT || "8080";
+    const defaultWsUrl = `${protocol}//${window.location.hostname}:${wsPort}`;
+    const wsUrl = process.env.NEXT_PUBLIC_WS_URL || defaultWsUrl;
+    
     setPeer(new WebrtcPeer(
-      "ws://localhost:8080", rId, peerIdRef.current, init,
+      wsUrl, rId, peerIdRef.current, init,
       (s) => setStatus(s),
       (m) => setMessages((prev) => [m, ...prev]),
       (blob, name) => setRxFile({ url: URL.createObjectURL(blob), name }),
