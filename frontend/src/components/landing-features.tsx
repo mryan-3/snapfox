@@ -50,7 +50,7 @@ export const LandingFeatures = memo(function LandingFeatures() {
           </div>
 
           <a
-            href="https://github.com/ryanm/snapfox"
+            href="https://github.com/mryan-3/snapfox"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-3 px-8 py-4 bg-white text-stone-900 rounded-full font-bold hover:bg-stone-100 transition-colors shadow-sm shrink-0"
