@@ -1,5 +1,18 @@
 import { encryptRaw, decryptRaw, generateEcdhKeyPair, exportPublicKey, importPublicKey, deriveAesKey } from "./crypto-helper";
 
+function getDeviceName() {
+  if (typeof navigator === "undefined") return "Remote Device";
+  const ua = navigator.userAgent;
+  if (/iPhone/i.test(ua)) return "iPhone";
+  if (/iPad/i.test(ua)) return "iPad";
+  if (/Android/i.test(ua)) return "Android Device";
+  if (/Mac OS X/i.test(ua)) return "Mac";
+  if (/Windows/i.test(ua)) return "Windows PC";
+  if (/Linux/i.test(ua)) return "Linux PC";
+  return "Remote Device";
+}
+
+
 export class WebrtcPeer {
   pc = new RTCPeerConnection({ iceServers: [{ urls: "stun:stun.l.google.com:19302" }] });
   dc: RTCDataChannel | null = null;
@@ -14,7 +27,8 @@ export class WebrtcPeer {
     wsUrl: string, private roomId: string, private peerId: string,
     private isInitiator: boolean,
     private onStatus: (status: string) => void, private onMessage: (msg: string) => void,
-    private onFile: (blob: Blob, name: string) => void, private onProgress?: (rx: number, total: number) => void
+    private onFile: (blob: Blob, name: string) => void, private onProgress?: (rx: number, total: number) => void,
+    private onDeviceName?: (name: string) => void
   ) {
     this.ws = new WebSocket(wsUrl);
     this.ws.onopen = () => this.ws.send(JSON.stringify({ type: "join", roomId, peerId }));
@@ -65,7 +79,7 @@ export class WebrtcPeer {
   private async handleSignaling(data: any) {
     if (data.type === "peer-joined") {
       const pubStr = await exportPublicKey((await this.ecdhPromise).publicKey);
-      this.sendSignal({ ecdh: pubStr });
+      this.sendSignal({ ecdh: pubStr, deviceName: getDeviceName() });
       if (this.isInitiator) {
         const offer = await this.pc.createOffer();
         await this.pc.setLocalDescription(offer);
@@ -73,6 +87,9 @@ export class WebrtcPeer {
       }
     } else if (data.type === "signal") {
       const { signal } = data;
+      if (signal.deviceName && this.onDeviceName) {
+        this.onDeviceName(signal.deviceName);
+      }
       if (signal.ecdh) {
         const remotePub = await importPublicKey(signal.ecdh);
         this.key = await deriveAesKey((await this.ecdhPromise).privateKey, remotePub);
